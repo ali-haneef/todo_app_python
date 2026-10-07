@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f7f8fc">
+    <title>TaskFlow — Clear your head</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="page-shell">
+        <header class="topbar">
+            <a class="brand" href="/" aria-label="TaskFlow home">
+                <span class="brand-mark"><span></span><span></span><span></span></span>
+                <span>Task<span>Flow</span></span>
+            </a>
+            <div class="topbar-actions">
+                <span class="desktop-note">Your day, in focus.</span>
+                <button class="button button-primary" id="new-task-button" type="button">
+                    <span class="button-plus">+</span> New task
+                </button>
+            </div>
+        </header>
+
+        <main>
+            <section class="hero">
+                <div>
+                    <p class="eyebrow">PERSONAL WORKSPACE</p>
+                    <h1>Make space for what matters.</h1>
+                    <p class="hero-copy">A calm place to capture your priorities and move them forward.</p>
+                </div>
+                <div class="hero-orbit" aria-hidden="true">
+                    <span class="orbit-dot orbit-dot-one"></span>
+                    <span class="orbit-dot orbit-dot-two"></span>
+                    <span class="orbit-dot orbit-dot-three"></span>
+                    <span class="orbit-ring"></span>
+                    <span class="orbit-core">✦</span>
+                </div>
+            </section>
+
+            <section class="stats-grid" aria-label="Task statistics">
+                <article class="stat-card stat-total">
+                    <div class="stat-icon">◈</div>
+                    <div><p>Total tasks</p><strong id="stat-total">0</strong></div>
+                </article>
+                <article class="stat-card stat-pending">
+                    <div class="stat-icon">◷</div>
+                    <div><p>In progress</p><strong id="stat-pending">0</strong></div>
+                </article>
+                <article class="stat-card stat-completed">
+                    <div class="stat-icon">✓</div>
+                    <div><p>Completed</p><strong id="stat-completed">0</strong></div>
+                </article>
+                <article class="stat-card stat-today">
+                    <div class="stat-icon">✦</div>
+                    <div><p>Due today</p><strong id="stat-due-today">0</strong></div>
+                </article>
+            </section>
+
+            <section class="tasks-panel">
+                <div class="panel-heading">
+                    <div>
+                        <h2>My tasks</h2>
+                        <p id="task-count-label">Everything you need to get done.</p>
+                    </div>
+                    <div class="view-indicator" aria-label="List view">☷ <span>List view</span></div>
+                </div>
+
+                <div class="toolbar">
+                    <label class="search-box">
+                        <span aria-hidden="true">⌕</span>
+                        <input id="search-input" type="search" placeholder="Search tasks..." autocomplete="off">
+                    </label>
+                    <div class="filter-tabs" role="tablist" aria-label="Filter tasks">
+                        <button class="filter-tab active" data-filter="all" role="tab" aria-selected="true" type="button">All</button>
+                        <button class="filter-tab" data-filter="pending" role="tab" aria-selected="false" type="button">Pending</button>
+                        <button class="filter-tab" data-filter="completed" role="tab" aria-selected="false" type="button">Completed</button>
+                    </div>
+                    <label class="sort-select">
+                        <span>Sort:</span>
+                        <select id="sort-select" aria-label="Sort tasks">
+                            <option value="priority">Priority</option>
+                            <option value="due_date">Due date</option>
+                            <option value="newest">Newest</option>
+                            <option value="oldest">Oldest</option>
+                        </select>
+                    </label>
+                </div>
+
+                <div class="task-list" id="task-list" aria-live="polite"></div>
+                <div class="loading-state" id="loading-state">
+                    <span class="spinner"></span> Loading your tasks...
+                </div>
+                <div class="empty-state hidden" id="empty-state">
+                    <div class="empty-art">☁</div>
+                    <h3 id="empty-title">No tasks here yet</h3>
+                    <p id="empty-copy">Add your first task and turn your intentions into progress.</p>
+                    <button class="button button-secondary" id="empty-add-button" type="button">Create a task</button>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">TaskFlow <span>•</span> Keep moving forward.</footer>
+    </div>
+
+    <div class="modal-backdrop hidden" id="task-modal" role="presentation">
+        <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+            <div class="modal-heading">
+                <div>
+                    <p class="eyebrow">TASK DETAILS</p>
+                    <h2 id="modal-title">Create a task</h2>
+                </div>
+                <button class="icon-button close-button" id="close-modal-button" type="button" aria-label="Close dialog">×</button>
+            </div>
+            <form id="task-form">
+                <input id="task-id" type="hidden">
+                <label class="field-label" for="task-title">Task title <span>*</span></label>
+                <input class="form-input" id="task-title" name="title" type="text" maxlength="200" placeholder="What needs to be done?" required>
+
+                <label class="field-label" for="task-description">Notes <small>optional</small></label>
+                <textarea class="form-input form-textarea" id="task-description" name="description" maxlength="2000" placeholder="Add a little context..."></textarea>
+
+                <div class="form-row">
+                    <div>
+                        <label class="field-label" for="task-due-date">Due date <small>optional</small></label>
+                        <input class="form-input" id="task-due-date" name="due_date" type="date">
+                    </div>
+                    <div>
+                        <label class="field-label" for="task-priority">Priority</label>
+                        <select class="form-input" id="task-priority" name="priority">
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                            <option value="low">Low</option>
+                        </select>
+                    </div>
+                </div>
+                <p class="form-error hidden" id="form-error"></p>
+                <div class="modal-actions">
+                    <button class="button button-ghost" id="cancel-modal-button" type="button">Cancel</button>
+                    <button class="button button-primary" id="save-task-button" type="submit">Save task</button>
+                </div>
+            </form>
+        </section>
+    </div>
+
+    <div class="toast hidden" id="toast" role="status"></div>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
